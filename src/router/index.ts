@@ -1,12 +1,13 @@
-// Fichero: src/router/index.ts
-import { createRouter, createWebHistory } from 'vue-router'
+// Fichero: src/router/index.ts (Versión Corregida y Completa)
 
-// Importamos las vistas que vamos a crear
+import { createRouter, createWebHistory } from 'vue-router'
+import useAuthStore from '@/stores/auth.store'
+
+// Importamos todas las vistas que usaremos
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
-import useAuthStore from '@/stores/auth.store'
-// import DashboardView from '../views/DashboardView.vue'
+import DashboardView from '../views/DashboardView.vue' // <-- Descomentamos y usamos esta
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,26 +27,45 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
     },
+
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: DashboardView,
+      meta: { requiresAuth: true }, // <-- Esta meta-información es la clave
+    },
+    // Aquí puedes añadir más rutas privadas en el futuro
+    // {
+    //   path: '/menu',
+    //   name: 'menu',
+    //   component: () => import('@/views/MenuView.vue'),
+    //   meta: { requiresAuth: true }
+    // }
   ],
 })
 
-// Navigation Guard: se ejecuta antes de cada cambio de ruta.
+// Navigation Guard: Nuestro vigilante de rutas
 router.beforeEach((to, from, next) => {
-  // Pinia no está disponible aquí hasta que la app se monte,
-  // por eso no podemos llamar a useAuthStore() en el top-level.
   const authStore = useAuthStore()
 
-  const requiresAuth = to.meta.requiresAuth
+  // Para que esto funcione en recargas de página, es VITAL que llames
+  // a `authStore.initializeAuth()` cuando la app se monta (lo haremos en App.vue).
   const isAuthenticated = authStore.isAuthenticated
 
+  const requiresAuth = to.meta.requiresAuth
+
+  // Caso 1: La ruta requiere login y el usuario NO está autenticado
   if (requiresAuth && !isAuthenticated) {
-    // Si la ruta requiere autenticación y no estamos logueados, vamos a login.
+    // Lo mandamos al login.
     next({ name: 'login' })
-  } else if (to.name === 'login' && isAuthenticated) {
-    // Si ya estamos logueados, no tiene sentido ver la página de login.
+  }
+  // Caso 2: El usuario está autenticado e intenta ir a Login o Register
+  else if ((to.name === 'login' || to.name === 'register') && isAuthenticated) {
+    // No tiene sentido, lo mandamos a su dashboard.
     next({ name: 'dashboard' })
-  } else {
-    // En cualquier otro caso, permitimos el acceso.
+  }
+  // Caso 3: Cualquier otra situación (acceso permitido)
+  else {
     next()
   }
 })

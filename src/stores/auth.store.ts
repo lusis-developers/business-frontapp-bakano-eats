@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import router from '@/router'
-import type { IUser } from '@/types/models.types'
+import type { IUser } from '@/types/models/IUser'
 import type { LoginCredentials, RegisterPayload } from '@/types/api.type'
 import { authService } from '@/services/auth.service'
 
