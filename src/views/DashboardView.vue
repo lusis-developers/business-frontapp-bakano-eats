@@ -2,44 +2,49 @@
 import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import useBusinessStore from '@/stores/business.store';
-import useMenuStore from '@/stores/menu.store';
 
 // --- Componentes ---
 import CreateBusinessPrompt from '@/components/dashboard/CreateBusinessPrompt.vue';
 import SetupScheduleForm from '@/components/dashboard/SetupScheduleForm.vue';
 import SetupMenuPrompt from '@/components/dashboard/SetupMenuPrompt.vue';
+import BusinessDashboard from '@/components/dashboard/BusinessDashboard.vue';
 import CreateOrderModal from '@/components/orders/CreateOrderModal.vue';
 import type { IDish } from '@/types/models/IDish';
 import type { IDrink } from '@/types/models/IDrink';
 import MenuItemModal from '@/components/dashboard/MenuItemModal.vue';
-import BusinessDashboard from '@/components/dashboard/BusinessDashboard.vue';
 
-// --- Stores ---
+// --- Store Único ---
+// Solo necesitamos el businessStore, ya que contiene toda la información.
 const businessStore = useBusinessStore();
-const menuStore = useMenuStore();
-
 const { business, isLoading, hasBusiness } = storeToRefs(businessStore);
-const { isMenuEmpty } = storeToRefs(menuStore);
 
+
+// --- COMPUTEDS SIMPLIFICADOS ---
+// Leen directamente del objeto 'business'.
 const hasSchedule = computed(() => {
   return business.value && business.value.schedule && business.value.schedule.length > 0;
 });
 
-// --- LA MEJORA PROFESIONAL: EL "STATE MACHINE" ---
-/**
- * Esta propiedad computada es ahora el ÚNICO cerebro que decide qué se muestra.
- * El template se vuelve mucho más limpio.
- */
+const isMenuEmpty = computed(() => {
+  // Si no hay negocio, o si el negocio no tiene los arrays, consideramos el menú vacío.
+  if (!business.value?.dishes || !business.value?.drinks) return true;
+  // La condición que pediste: el menú está vacío si ambos arrays tienen longitud 0.
+  return business.value.dishes.length === 0 && business.value.drinks.length === 0;
+});
+
+
+// --- LA MÁQUINA DE ESTADOS (STATE MACHINE) ---
+// Esta lógica ahora funciona perfectamente porque depende de una única fuente de verdad.
 const dashboardState = computed(() => {
   if (isLoading.value) return 'LOADING';
   if (!hasBusiness.value) return 'CREATE_BUSINESS';
   if (!hasSchedule.value) return 'SETUP_SCHEDULE';
   if (isMenuEmpty.value) return 'SETUP_MENU';
-  return 'SHOW_DASHBOARD'; // El estado final y exitoso
+  return 'SHOW_DASHBOARD';
 });
 
 
-// --- Lógica de Modales ---
+// --- Lógica de Modales (sin cambios) ---
 const isMenuModalOpen = ref(false);
 const isOrderModalOpen = ref(false);
 const itemTypeToAddOrEdit = ref<'dish' | 'drink' | null>(null);
@@ -51,7 +56,7 @@ function openMenuItemModal(type: 'dish' | 'drink', itemToEdit: any = null) {
   isMenuModalOpen.value = true;
 }
 
-// --- Data Fetching ---
+// --- Data Fetching (sin cambios) ---
 onMounted(() => {
   businessStore.fetchBusinessData();
 });

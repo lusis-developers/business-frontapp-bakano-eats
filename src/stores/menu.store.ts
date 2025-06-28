@@ -9,6 +9,7 @@ import type {
 } from '@/types/api.type'
 import type { IDish } from '@/types/models/IDish'
 import type { IDrink } from '@/types/models/IDrink'
+import emitter from '@/utils/emitter'
 import { defineStore } from 'pinia'
 
 interface MenuState {
@@ -48,6 +49,7 @@ const useMenuStore = defineStore('menu', {
       this.error = null
       try {
         const response = await dishService.create(businessId, payload)
+        emitter.emit('menu-updated')
         this.dishes.push(response.dish)
       } catch (e: any) {
         this.error = e.message || 'No se pudo añadir el platillo.'
@@ -70,6 +72,7 @@ const useMenuStore = defineStore('menu', {
         if (index !== -1) {
           this.dishes[index] = updatedDish
         }
+        emitter.emit('menu-updated')
       } catch (e: any) {
         this.error = e.message || 'No se pudo actualizar el platillo.'
         throw e
@@ -87,6 +90,8 @@ const useMenuStore = defineStore('menu', {
 
         // Si la llamada a la API tiene éxito, actualizamos el estado local.
         this.dishes = this.dishes.filter((d) => d._id !== dishId)
+
+        emitter.emit('menu-updated')
       } catch (e: any) {
         this.error = 'No se pudo eliminar el platillo.'
         throw e
@@ -107,6 +112,8 @@ const useMenuStore = defineStore('menu', {
         // Llamamos al servicio de bebidas (que crearemos en el siguiente paso si no existe)
         const response = await drinkService.create(businessId, payload)
         this.drinks.push(response.drink)
+
+        emitter.emit('menu-updated')
       } catch (e: any) {
         this.error = e.message || 'No se pudo añadir la bebida.'
         throw e
@@ -125,6 +132,7 @@ const useMenuStore = defineStore('menu', {
         if (index !== -1) {
           this.drinks[index] = updatedDrink
         }
+        emitter.emit('menu-updated')
       } catch (e: any) {
         this.error = e.message || 'No se pudo actualizar la bebida.'
         throw e
@@ -139,6 +147,7 @@ const useMenuStore = defineStore('menu', {
       try {
         await drinkService.remove(businessId, drinkId)
         this.drinks = this.drinks.filter((d) => d._id !== drinkId)
+        emitter.emit('menu-updated')
       } catch (e: any) {
         this.error = 'No se pudo eliminar la bebida.'
         throw e

@@ -1,6 +1,8 @@
 import { businessService } from '@/services/business.service'
 import type { CreateBusinessPayload } from '@/types/api.type'
 import type { IBusiness, IBusinessHours } from '@/types/models/IBusiness'
+import type { IDish } from '@/types/models/IDish'
+import type { IDrink } from '@/types/models/IDrink'
 import { defineStore } from 'pinia'
 
 // Interfaz para la forma del estado de este store.
@@ -18,10 +20,14 @@ const useBusinessStore = defineStore('business', {
   }),
 
   getters: {
-    /**
-     * Un getter simple y reactivo para saber si el usuario ya tiene un negocio cargado.
-     */
     hasBusiness: (state) => !!state.business,
+    hasSchedule: (state) => !!state.business?.schedule && state.business.schedule.length > 0,
+    // Getters del menú que leen del estado 'business'
+    dishes: (state): IDish[] => state.business?.dishes || [],
+    drinks: (state): IDrink[] => state.business?.drinks || [],
+    isMenuEmpty(state): boolean {
+      return this.dishes.length === 0 && this.drinks.length === 0
+    },
   },
 
   actions: {
