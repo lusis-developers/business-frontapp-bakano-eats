@@ -48,6 +48,9 @@ onUnmounted(() => {
         <router-link to="/menu" class="nav-link">
           <i class="fas fa-book-open"></i> <span class="link-label">Mi Menú</span>
         </router-link>
+        <router-link to="/orders" class="nav-link">
+          <i class="fas fa-receipt"></i> <span class="link-label">Pedidos</span>
+        </router-link>
         <button @click="logout" class="nav-link nav-link--danger">
           <i class="fas fa-sign-out-alt"></i> <span class="link-label">Cerrar Sesión</span>
         </button>

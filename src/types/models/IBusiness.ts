@@ -1,3 +1,6 @@
+import type { IDish } from './IDish'
+import type { IDrink } from './IDrink'
+
 export type ObjectId = string
 
 export interface IBusinessHours {
@@ -6,38 +9,6 @@ export interface IBusinessHours {
   close: string
   isOpen: boolean
 }
-
-/**
- * Corresponde a la interfaz IDish de tu modelo de Mongoose.
- */
-export interface IDish {
-  _id: ObjectId
-  name: string
-  description: string
-  price: number
-  category: 'Entrante' | 'Plato Fuerte' | 'Postre' | 'Sopa'
-  imageUrl?: string
-  business: ObjectId
-  createdAt?: string
-  updatedAt?: string
-}
-
-/**
- * Corresponde a la interfaz IDrink de tu modelo de Mongoose.
- */
-export interface IDrink {
-  _id: ObjectId
-  name: string
-  description: string
-  price: number
-  category: 'Gaseosa' | 'Jugo Natural' | 'Bebida Energética' | 'Licor'
-  size?: string
-  imageUrl?: string
-  business: ObjectId
-  createdAt?: string
-  updatedAt?: string
-}
-
 export interface IBusiness {
   _id: ObjectId
   name: string

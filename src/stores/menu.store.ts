@@ -7,7 +7,8 @@ import type {
   UpdateDishPayload,
   UpdateDrinkPayload,
 } from '@/types/api.type'
-import type { IDish, IDrink } from '@/types/models/IBusiness'
+import type { IDish } from '@/types/models/IDish'
+import type { IDrink } from '@/types/models/IDrink'
 import { defineStore } from 'pinia'
 
 interface MenuState {

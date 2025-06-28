@@ -1,4 +1,7 @@
-import type { IBusiness, IBusinessHours, IDish, IDrink } from './models/IBusiness'
+import type { IBusiness, IBusinessHours } from './models/IBusiness'
+import type { IDish } from './models/IDish'
+import type { IDrink } from './models/IDrink'
+import type { IOrder } from './models/IOrder'
 import type { IUser } from './models/IUser'
 
 // Payload para enviar a /auth/login
@@ -130,4 +133,52 @@ export interface DeleteDrinkResponse {
   message: string
   deletedDrinkId: string
   drinkDeleted: IDrink
+}
+
+export interface OrderItemPayload {
+  itemId: string
+  itemType: 'Dish' | 'Drink'
+  quantity: number
+}
+
+export type EditOrderPayload = Partial<Omit<CreateOrderPayload, 'items'>> & {
+  items?: OrderItemPayload[]
+  status?: IOrder['status']
+}
+
+export interface CreateOrderPayload {
+  customerName: string
+  customerPhone: string
+  customerAddress: string
+  items: OrderItemPayload[]
+  paymentMethod: 'Efectivo' | 'Transferencia' | 'Tarjeta'
+  salesChannel: 'WhatsApp' | 'Instagram' | 'Presencial'
+  deliveryType: 'Pickup' | 'Delivery'
+  comments?: string
+}
+
+export interface CreateOrderResponse {
+  message: string
+  order: IOrder
+}
+
+export interface GetOrdersResponse {
+  message: string
+  orders: IOrder[]
+}
+
+/**
+ * NUEVO: El payload que enviaremos para actualizar el estado de una orden.
+ * Corresponde a la ruta PATCH /api/business/:businessId/orders/:orderId
+ */
+export interface UpdateOrderStatusPayload {
+  status: 'pending' | 'confirmed' | 'preparing' | 'delivered' | 'cancelled'
+}
+
+/**
+ * NUEVO: La respuesta que esperamos de la API al actualizar una orden.
+ */
+export interface UpdateOrderResponse {
+  message: string
+  order: IOrder
 }
