@@ -2,6 +2,7 @@ import type {
   CreateOrderPayload,
   CreateOrderResponse,
   EditOrderPayload,
+  GetOrdersResponse,
   UpdateOrderResponse,
 } from '@/types/api.type'
 import APIBase from './APIBase'
@@ -36,6 +37,19 @@ class OrderService extends APIBase {
     // Usamos el método 'patch' de nuestra clase APIBase.
     const url = `business/${businessId}/orders/${orderId}`
     const response = await this.patch<UpdateOrderResponse>(url, payload)
+    return response.data
+  }
+
+  /**
+   * NUEVO: Llama al endpoint para obtener todas las órdenes de un negocio.
+   * Corresponde a la ruta: GET /api/business/:businessId/orders
+   * @param businessId El ID del negocio del cual se quieren obtener las órdenes.
+   * @returns La respuesta de la API con el listado de órdenes.
+   */
+  public async getAll(businessId: string): Promise<GetOrdersResponse> {
+    // Usamos el método 'get' de nuestra clase APIBase.
+    const url = `business/${businessId}/orders`
+    const response = await this.get<GetOrdersResponse>(url)
     return response.data
   }
 }

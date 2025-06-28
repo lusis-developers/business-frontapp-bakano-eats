@@ -59,6 +59,21 @@ const useOrderStore = defineStore('order', {
         console.error('Error al actualizar el estado de la orden:', e.message)
       }
     },
+
+    async fetchOrders(businessId: string) {
+      this.isLoading = true
+      this.error = null
+      try {
+        // Llamamos al método `getAll` que acabamos de añadir al servicio.
+        const response = await orderService.getAll(businessId)
+        this.orders = response.orders
+      } catch (e: any) {
+        this.error = e.message || 'No se pudieron cargar las órdenes.'
+        this.orders = [] // En caso de error, aseguramos que la lista esté vacía.
+      } finally {
+        this.isLoading = false
+      }
+    },
   },
 })
 

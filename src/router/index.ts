@@ -42,6 +42,13 @@ const router = createRouter({
       component: () => import('@/views/MenuView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/orders',
+      name: 'orders',
+      // La cargamos de forma perezosa para un rendimiento óptimo
+      component: () => import('@/views/OrdersView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

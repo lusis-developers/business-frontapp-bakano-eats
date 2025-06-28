@@ -12,7 +12,7 @@ import CreateOrderModal from '@/components/orders/CreateOrderModal.vue';
 import type { IDish } from '@/types/models/IDish';
 import type { IDrink } from '@/types/models/IDrink';
 import MenuItemModal from '@/components/dashboard/MenuItemModal.vue';
-import BUsinessDashboard from '@/components/dashboard/BUsinessDashboard.vue';
+import BusinessDashboard from '@/components/dashboard/BusinessDashboard.vue';
 
 // --- Stores ---
 const businessStore = useBusinessStore();
@@ -73,7 +73,7 @@ onMounted(() => {
       @add-drink="openMenuItemModal('drink')"
     />
 
-    <BUsinessDashboard
+    <BusinessDashboard
       v-if="dashboardState === 'SHOW_DASHBOARD' && business"
       :business="business"
       @add-order="isOrderModalOpen = true"
