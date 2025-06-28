@@ -1,4 +1,4 @@
-import type { IBusiness, IBusinessHours } from './models/IBusiness'
+import type { IBusiness, IBusinessHours, IDish } from './models/IBusiness'
 import type { IUser } from './models/IUser'
 
 // Payload para enviar a /auth/login
@@ -55,4 +55,20 @@ export type UpdateSchedulePayload = IBusinessHours[]
 export interface UpdateScheduleResponse {
   message: string
   business: IBusiness
+}
+
+export interface CreateDishPayload {
+  name: string
+  description: string
+  price: number
+  category: 'Entrante' | 'Plato Fuerte' | 'Postre' | 'Sopa'
+  imageUrl?: string
+}
+
+/**
+ * NUEVO: Respuesta de la API al crear un platillo.
+ */
+export interface CreateDishResponse {
+  message: string
+  dish: IDish
 }

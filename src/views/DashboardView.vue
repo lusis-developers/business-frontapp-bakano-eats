@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import useBusinessStore from '@/stores/business.store';
+import useMenuStore from '@/stores/menu.store';
 
 import CreateBusinessPrompt from '@/components/dashboard/CreateBusinessPrompt.vue';
 import SetupScheduleForm from '@/components/dashboard/SetupScheduleForm.vue';
+import MenuItemModal from '@/components/dashboard/MenuItemModal.vue';
+import SetupMenuPrompt from '@/components/dashboard/SetupMenuPrompt.vue';
 
 const businessStore = useBusinessStore();
-const { business, isLoading, hasBusiness } = storeToRefs(businessStore);
+const menuStore = useMenuStore();
 
-// Creamos un getter computado para la nueva condición
+const { business, isLoading, hasBusiness } = storeToRefs(businessStore);
+const { isMenuEmpty } = storeToRefs(menuStore);
+
 const hasSchedule = computed(() => {
   return business.value && business.value.schedule && business.value.schedule.length > 0;
 });
+
+const isModalOpen = ref(false);
+const itemTypeToAdd = ref<'dish' | 'drink' | null>(null);
+
+function openAddItemModal(type: 'dish' | 'drink') {
+  itemTypeToAdd.value = type;
+  isModalOpen.value = true;
+}
 
 onMounted(() => {
   businessStore.fetchBusinessData();
@@ -26,22 +39,29 @@ onMounted(() => {
     </div>
 
     <div v-else>
-      <div v-if="hasBusiness && business">
-        
-        <div v-if="hasSchedule">
-          <h1 class="business-title">Panel de {{ business.name }}</h1>
-          <p class="business-subtitle">¡Todo listo! Aquí verás tus estadísticas y órdenes.</p>
+      <CreateBusinessPrompt v-if="!hasBusiness" />
+
+      <SetupScheduleForm v-else-if="!hasSchedule" />
+
+      <SetupMenuPrompt
+        v-else-if="isMenuEmpty" 
+        @add-dish="openAddItemModal('dish')"
+        @add-drink="openAddItemModal('drink')"
+      />
+
+      <div v-else-if="business">
+        <h1 class="business-title">Panel de {{ business.name }}</h1>
+        <p class="business-subtitle">¡Todo listo! Aquí verás tus estadísticas y órdenes.</p>
         </div>
-
-        <SetupScheduleForm v-else />
-
-      </div>
-
-      <CreateBusinessPrompt v-else />
     </div>
+
+    <MenuItemModal
+      :is-open="isModalOpen"
+      :item-type="itemTypeToAdd"
+      @close="isModalOpen = false" 
+    />
   </main>
 </template>
-
 
 <style lang="scss" scoped>
 @use '@/styles/index.scss' as *;
