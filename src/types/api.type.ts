@@ -1,12 +1,18 @@
 import type { IUser } from './models.types'
 
-// Payload para el endpoint de login
+// Payload para enviar a /auth/login
 export interface LoginCredentials {
   email: string
   password: string
 }
 
-// Payload para el endpoint de registro
+// Respuesta que esperamos de /auth/login
+export interface LoginResponse {
+  message: string
+  token: string
+}
+
+// Payload para enviar a /auth/register
 export interface RegisterPayload {
   firstName: string
   lastName: string
@@ -14,13 +20,7 @@ export interface RegisterPayload {
   password: string
 }
 
-// Respuesta esperada del endpoint de login
-export interface LoginResponse {
-  message: string
-  token: string
-}
-
-// Respuesta esperada del endpoint de registro
+// Respuesta que esperamos de /auth/register
 export interface RegisterResponse {
   message: string
   user: IUser

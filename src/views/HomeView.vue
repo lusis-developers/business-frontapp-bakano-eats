@@ -23,13 +23,13 @@
           </router-link>
         </div>
       </div>
-      <!-- <div class="hero-image-container">
+      <div class="hero-image-container">
         <img 
           src="@/assets/images/dashboard-mockup.png" 
           alt="Dashboard de gestión de órdenes" 
           class="hero-image"
         />
-      </div> -->
+      </div>
     </section>
   </main>
 </template>

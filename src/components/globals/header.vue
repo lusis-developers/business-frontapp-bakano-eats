@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import useAuthStore from '@/stores/auth.store';
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth.store'; // 1. Importamos nuestro store de Pinia
 
 // 2. Obtenemos la instancia del store y la función de logout
 const authStore = useAuthStore();
