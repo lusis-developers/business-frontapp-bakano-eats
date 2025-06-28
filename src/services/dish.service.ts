@@ -1,4 +1,10 @@
-import type { CreateDishPayload, CreateDishResponse } from '@/types/api.type'
+import type {
+  CreateDishPayload,
+  CreateDishResponse,
+  DeleteDishResponse,
+  UpdateDishPayload,
+  UpdateDishResponse,
+} from '@/types/api.type'
 import APIBase from './APIBase'
 
 class DishService extends APIBase {
@@ -13,9 +19,24 @@ class DishService extends APIBase {
     return response.data
   }
 
-  // En el futuro, los métodos para actualizar y borrar irían aquí.
-  // public async update(...) {}
-  // public async remove(...) {}
+  public async update(
+    businessId: string,
+    dishId: string,
+    payload: UpdateDishPayload,
+  ): Promise<UpdateDishResponse> {
+    const response = await this.patch<UpdateDishResponse>(
+      `business/${businessId}/dishes/${dishId}`,
+      payload,
+    )
+    return response.data
+  }
+
+  public async remove(businessId: string, dishId: string): Promise<DeleteDishResponse> {
+    const response = await this.delete<DeleteDishResponse>(
+      `business/${businessId}/dishes/${dishId}`,
+    )
+    return response.data
+  }
 }
 
 export const dishService = new DishService()

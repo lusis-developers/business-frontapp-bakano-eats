@@ -34,13 +34,14 @@ const router = createRouter({
       component: DashboardView,
       meta: { requiresAuth: true }, // <-- Esta meta-información es la clave
     },
-    // Aquí puedes añadir más rutas privadas en el futuro
-    // {
-    //   path: '/menu',
-    //   name: 'menu',
-    //   component: () => import('@/views/MenuView.vue'),
-    //   meta: { requiresAuth: true }
-    // }
+    {
+      // ¡AQUÍ ESTÁ EL CAMBIO! Activamos la ruta del menú.
+      path: '/menu',
+      name: 'menu',
+      // Usamos "lazy loading" (carga perezosa) para esta vista.
+      component: () => import('@/views/MenuView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

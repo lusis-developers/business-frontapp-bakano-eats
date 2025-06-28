@@ -1,63 +1,92 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import useBusinessStore from '@/stores/business.store';
 import useMenuStore from '@/stores/menu.store';
+import type { IDish, IDrink } from '@/types/models/IBusiness';
 
-// --- PROPS Y EMITS ---
 const props = defineProps<{
   isOpen: boolean;
-  itemType: 'dish' | 'drink' | null; // Determina qué formulario mostrar
+  itemType: 'dish' | 'drink' | null;
+  itemToEdit?: IDish | IDrink | null;
 }>();
 
 const emit = defineEmits(['close']);
 
-
-// --- STORES ---
 const businessStore = useBusinessStore();
 const menuStore = useMenuStore();
 const { business } = storeToRefs(businessStore);
-// Obtenemos isLoading y error del menuStore, que es el encargado de estas acciones
 const { isLoading, error } = storeToRefs(menuStore);
-
 
 // --- ESTADO LOCAL DEL FORMULARIO ---
 const name = ref('');
 const description = ref('');
 const price = ref<number | undefined>();
 const category = ref('');
-// const size = ref(''); // Para cuando implementemos las bebidas
+const size = ref(''); // Estado para el tamaño de la bebida
 
-// --- LÓGICA ---
+const isEditMode = computed(() => !!props.itemToEdit);
 
-// Un watcher profesional: limpia el formulario cada vez que se abre el modal.
+// Watcher mejorado para manejar ambos tipos de item
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
-    name.value = '';
-    description.value = '';
-    price.value = undefined;
-    category.value = '';
-    menuStore.error = null; // Limpiamos cualquier error previo del store
+    menuStore.error = null;
+    if (isEditMode.value && props.itemToEdit) {
+      name.value = props.itemToEdit.name;
+      description.value = props.itemToEdit.description;
+      price.value = props.itemToEdit.price;
+      if ('category' in props.itemToEdit) {
+        category.value = props.itemToEdit.category;
+      }
+      // Poblamos el tamaño si estamos editando una bebida
+      if (props.itemType === 'drink' && 'size' in props.itemToEdit) {
+        size.value = props.itemToEdit.size || '';
+      }
+    } else {
+      // Limpiamos todo al crear un nuevo item
+      name.value = '';
+      description.value = '';
+      price.value = undefined;
+      category.value = '';
+      size.value = '';
+    }
   }
 });
 
+// --- HANDLE SUBMIT INTELIGENTE ---
 async function handleSubmit() {
-  if (!business.value) return; // Guarda de seguridad
+  if (!business.value) return;
 
+  // Lógica para PLATILLOS
   if (props.itemType === 'dish') {
-    await menuStore.addDish(business.value._id, {
+    const payload = {
       name: name.value,
       description: description.value,
       price: price.value ?? 0,
-      category: category.value as any,
-    });
+      category: category.value as 'Entrante' | 'Plato Fuerte' | 'Postre' | 'Sopa',
+    };
+    if (isEditMode.value && props.itemToEdit) {
+      await menuStore.updateDish(business.value._id, props.itemToEdit._id, payload);
+    } else {
+      await menuStore.addDish(business.value._id, payload);
+    }
   }
-  // En el futuro:
-  // else if (props.itemType === 'drink') {
-  //   await menuStore.addDrink(...)
-  // }
+  // Lógica para BEBIDAS
+  else if (props.itemType === 'drink') {
+    const payload = {
+      name: name.value,
+      description: description.value,
+      price: price.value ?? 0,
+      category: category.value as 'Gaseosa' | 'Jugo Natural' | 'Bebida Energética' | 'Licor',
+      size: size.value,
+    };
+    if (isEditMode.value && props.itemToEdit) {
+      await menuStore.updateDrink(business.value._id, props.itemToEdit._id, payload);
+    } else {
+      await menuStore.addDrink(business.value._id, payload);
+    }
+  }
 
-  // Si no hubo error en la acción del store, cerramos el modal.
   if (!error.value) {
     emit('close');
   }
@@ -69,24 +98,25 @@ async function handleSubmit() {
     <Transition name="modal-fade">
       <div v-if="isOpen" class="modal-overlay" @click.self="emit('close')">
         <div class="modal-card">
-          <h3 class="modal-title">Añadir Nuevo {{ itemType === 'dish' ? 'Platillo' : 'Bebida' }}</h3>
+          <h3 class="modal-title">{{ isEditMode ? 'Editar' : 'Añadir' }} {{ itemType === 'dish' ? 'Platillo' : 'Bebida' }}</h3>
           <form @submit.prevent="handleSubmit" novalidate>
             <div class="form-group">
-              <label for="name">Nombre del Producto</label>
-              <input v-model="name" type="text" id="name" placeholder="Ej: Lomo Saltado" required />
+              <label for="name">Nombre</label>
+              <input v-model="name" type="text" required />
             </div>
             <div class="form-group">
               <label for="description">Descripción</label>
-              <textarea v-model="description" id="description" rows="3" placeholder="Jugosos trozos de lomo con..." required></textarea>
+              <textarea v-model="description" rows="3" required></textarea>
             </div>
             <div class="form-group-inline">
               <div class="form-group">
                 <label for="price">Precio ($)</label>
-                <input v-model.number="price" type="number" step="0.01" id="price" placeholder="0.00" required />
+                <input v-model.number="price" type="number" step="0.01" required />
               </div>
+              
               <div v-if="itemType === 'dish'" class="form-group">
-                <label for="category">Categoría</label>
-                <select v-model="category" id="category" required>
+                <label for="category-dish">Categoría</label>
+                <select v-model="category" id="category-dish" required>
                   <option disabled value="">Seleccione una...</option>
                   <option>Entrante</option>
                   <option>Plato Fuerte</option>
@@ -94,14 +124,30 @@ async function handleSubmit() {
                   <option>Sopa</option>
                 </select>
               </div>
+
+              <div v-if="itemType === 'drink'" class="form-group">
+                <label for="category-drink">Categoría</label>
+                <select v-model="category" id="category-drink" required>
+                  <option disabled value="">Seleccione una...</option>
+                  <option>Gaseosa</option>
+                  <option>Jugo Natural</option>
+                  <option>Bebida Energética</option>
+                  <option>Licor</option>
+                </select>
+              </div>
             </div>
             
+            <div v-if="itemType === 'drink'" class="form-group">
+              <label for="size">Tamaño (Opcional)</label>
+              <input v-model="size" type="text" id="size" placeholder="Ej: 300ml, 1L" />
+            </div>
+
             <div v-if="error" class="error-message">{{ error }}</div>
 
             <div class="modal-actions">
               <button type="button" class="button-secondary" @click="emit('close')" :disabled="isLoading">Cancelar</button>
               <button type="submit" class="button-primary" :disabled="isLoading">
-                {{ isLoading ? 'Guardando...' : 'Añadir al Menú' }}
+                {{ isLoading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Añadir') }}
               </button>
             </div>
           </form>

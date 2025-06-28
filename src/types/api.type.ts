@@ -1,4 +1,4 @@
-import type { IBusiness, IBusinessHours, IDish } from './models/IBusiness'
+import type { IBusiness, IBusinessHours, IDish, IDrink } from './models/IBusiness'
 import type { IUser } from './models/IUser'
 
 // Payload para enviar a /auth/login
@@ -71,4 +71,63 @@ export interface CreateDishPayload {
 export interface CreateDishResponse {
   message: string
   dish: IDish
+}
+
+export interface GetMenuResponse {
+  message: string
+  menu: IBusiness
+}
+
+export interface CreateDishPayload {
+  name: string
+  description: string
+  price: number
+  category: 'Entrante' | 'Plato Fuerte' | 'Postre' | 'Sopa'
+  imageUrl?: string
+}
+
+export type UpdateDishPayload = Partial<CreateDishPayload>
+
+export interface CreateDishResponse {
+  message: string
+  dish: IDish
+}
+
+export type UpdateDishResponse = CreateDishResponse
+
+export interface DeleteDishResponse {
+  message: string
+  deletedDishId: string
+  dishDeleted: IDish
+}
+
+export interface CreateDrinkPayload {
+  name: string
+  description: string
+  price: number
+  category: 'Gaseosa' | 'Jugo Natural' | 'Bebida Energética' | 'Licor'
+  size?: string
+  imageUrl?: string
+}
+
+export type UpdateDrinkPayload = Partial<CreateDrinkPayload>
+
+// Opcional pero recomendado: un tipo para la respuesta de la API
+export interface CreateDrinkResponse {
+  message: string
+  drink: IDrink
+}
+
+export interface DrinkResponse {
+  message: string
+  drink: IDrink
+}
+
+/**
+ * Respuesta de la API al eliminar una bebida.
+ */
+export interface DeleteDrinkResponse {
+  message: string
+  deletedDrinkId: string
+  drinkDeleted: IDrink
 }

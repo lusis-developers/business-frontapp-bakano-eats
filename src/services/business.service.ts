@@ -3,6 +3,7 @@ import APIBase from './APIBase'
 import type {
   CreateBusinessPayload,
   CreateBusinessResponse,
+  GetMenuResponse,
   UpdateSchedulePayload,
   UpdateScheduleResponse,
 } from '@/types/api.type'
@@ -52,6 +53,16 @@ class BusinessService extends APIBase {
       `business/${businessId}/schedule`,
       payload,
     )
+    return response.data
+  }
+
+  /**
+   * NUEVO: Obtiene el negocio con su menú completamente poblado.
+   * @param businessId El ID del negocio.
+   * @returns La respuesta de la API con el objeto de negocio/menú.
+   */
+  public async getMenu(businessId: string): Promise<GetMenuResponse> {
+    const response = await this.get<GetMenuResponse>(`${businessId}/menu`)
     return response.data
   }
 }
